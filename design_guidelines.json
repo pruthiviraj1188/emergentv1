@@ -1,0 +1,133 @@
+{
+  "theme_archetype": {
+    "name": "Swiss & High-Contrast",
+    "mode": "Light (Marketing/User) & Dark (Authority)",
+    "reasoning": "Personal safety requires extreme clarity, authority, and trust. A Swiss/High-Contrast approach ensures emergency actions are immediately visible while maintaining a serious, reliable tone. The Authority Dashboard intentionally shifts to Dark Mode for command-center low-light ops, avoiding the standard 'SaaS blue' in favor of high-alert Reds and deep Slates."
+  },
+  "color_palette": {
+    "base": {
+      "background": "#FAFAFA",
+      "surface": "#FFFFFF",
+      "foreground": "#0A0A0A",
+      "muted": "#F4F4F5",
+      "muted_foreground": "#71717A",
+      "border": "#E4E4E7"
+    },
+    "brand": {
+      "primary": "#E11D48",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#0F172A",
+      "secondary_foreground": "#F8FAFC"
+    },
+    "semantic": {
+      "danger": "#DC2626",
+      "warning": "#F59E0B",
+      "success": "#16A34A",
+      "info": "#2563EB"
+    },
+    "dark_mode_overrides": {
+      "background": "#09090B",
+      "surface": "#18181B",
+      "foreground": "#FAFAFA",
+      "border": "#27272A",
+      "muted": "#27272A",
+      "muted_foreground": "#A1A1AA"
+    }
+  },
+  "typography": {
+    "import_instructions": "Add Google Fonts imports for 'Outfit' and 'IBM Plex Sans' to your HTML/CSS.",
+    "headings": {
+      "family": "'Outfit', sans-serif",
+      "weights": ["700", "800", "900"],
+      "tracking": "tracking-tight"
+    },
+    "body": {
+      "family": "'IBM Plex Sans', sans-serif",
+      "weights": ["400", "500", "600"],
+      "tracking": "tracking-normal"
+    },
+    "sizes": {
+      "h1": "text-5xl sm:text-6xl lg:text-7xl tracking-tighter font-black text-zinc-950",
+      "h2": "text-3xl sm:text-4xl lg:text-5xl tracking-tight font-bold text-zinc-900",
+      "h3": "text-xl sm:text-2xl font-bold text-zinc-900",
+      "body": "text-base leading-relaxed text-zinc-700",
+      "overline": "text-xs font-bold uppercase tracking-[0.2em] text-zinc-500"
+    }
+  },
+  "spacing_layout": {
+    "bento_marketing": "grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12",
+    "bento_dashboard": "grid grid-cols-1 lg:grid-cols-4 gap-6",
+    "generous_padding": "py-24 px-6 md:px-12 lg:px-24",
+    "card_padding": "p-8 md:p-10",
+    "radius": "rounded-none md:rounded-sm",
+    "container_max": "max-w-7xl mx-auto"
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-rose-600 text-white font-bold hover:bg-rose-700 transition-colors rounded-none px-8 py-4 uppercase tracking-wide text-sm",
+      "secondary": "bg-zinc-950 text-white font-bold hover:bg-zinc-800 transition-colors rounded-none px-8 py-4 uppercase tracking-wide text-sm",
+      "sos_button": "w-56 h-56 rounded-full bg-rose-600 text-white font-black text-3xl shadow-[0_0_50px_rgba(225,29,72,0.5)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center flex-col gap-2 relative overflow-hidden"
+    },
+    "cards": {
+      "glass": "backdrop-blur-xl bg-white/70 border border-white/40 shadow-xl",
+      "solid": "bg-white border border-zinc-200 shadow-sm",
+      "dark_panel": "bg-zinc-950 border border-zinc-800 text-zinc-100"
+    },
+    "forms": {
+      "input": "bg-zinc-50 border border-zinc-200 rounded-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all p-3 w-full",
+      "label": "text-sm font-bold text-zinc-900 uppercase tracking-wider mb-2 block"
+    }
+  },
+  "media_urls": {
+    "hero_abstract": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/79229011-d864-41d5-b69f-d48e7278b45a/images/aecd2c919ea0baa6c599adbf154b014cb4ddacbf86a6348f006769919e3ac986.png",
+      "description": "Abstract minimalist 3D frosted glass dome representing AI protection. Use in the hero section right side or as a background for the login card."
+    },
+    "trust_security": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/79229011-d864-41d5-b69f-d48e7278b45a/images/a352efa580b7cd6ecff276fa8504c8140afcf141d810a3abd7c252ef1bc69a75.png",
+      "description": "Macro photography of brushed titanium metal. Use as a background for the Trust & Security section."
+    },
+    "live_tracking_map": {
+      "url": "https://images.pexels.com/photos/7856880/pexels-photo-7856880.jpeg",
+      "description": "Close-up of a car dashboard showing a GPS navigation screen. Use for the 'Live Location Tracking' feature showcase."
+    },
+    "safe_walk_city": {
+      "url": "https://images.pexels.com/photos/7524005/pexels-photo-7524005.jpeg",
+      "description": "Stylish young woman walking on illuminated city street at night. Use for 'Real-Time Protection' imagery."
+    }
+  },
+  "pages_structure": {
+    "landing_page": {
+      "nav": "Sticky header (Crystal Glass: backdrop-blur-xl bg-white/70 border-b border-white/40). Logo left, links center, CTA right.",
+      "hero": "Bento Grid Mode A. Left (col-span-12 lg:col-span-7): Huge H1 'Your Safety. Powered by AI.', stats list. Right (col-span-12 lg:col-span-5): Embed the 'Secure Access' login card here floating over the 'hero_abstract' image using Glassmorphism. Ensure the login card has role selection (User, Admin, Authority).",
+      "how_it_works": "3-column grid, generous padding. Large watermark numbers (text-8xl text-zinc-100 font-black absolute -z-10 -top-4 -left-4) behind the step text.",
+      "features": "Bento grid. Use high-contrast solid cards. Red accents for SOS/Threat detection features.",
+      "real_time_protection": "Split section. Image of 'safe_walk_city' with overlapping 'live_tracking_map' in a floating card, demonstrating the UI.",
+      "trust_security": "Dark section using 'trust_security' image as background with black/80 overlay. White text, badges for ISO/GDPR.",
+      "footer": "Dark background (#09090B), high contrast white text. Include newsletter and contact form here."
+    },
+    "user_dashboard": {
+      "layout": "Control Room Grid (Mode B). Clean white/gray background (Light Mode).",
+      "hero_widget": "Central massive SOS button. Use Framer Motion for a press-and-hold animation (progress ring filling up over 3 seconds).",
+      "sidebar": "Live location toggle, emergency contacts list, recent alerts history."
+    },
+    "authority_dashboard": {
+      "layout": "Forced Dark Mode overrides. Control Room Grid. Tight gaps. Background #09090B.",
+      "sidebar_feed": "col-span-1 h-[calc(100vh-4rem)] overflow-y-auto border-r border-zinc-800. List of active SOS alerts. High-threat alerts have red borders and pulsing dots.",
+      "main_map": "col-span-3 h-full bg-zinc-950 flex flex-col items-center justify-center. Use a dark-themed map component (or placeholder styling representing a map) with red markers for incidents."
+    }
+  },
+  "motion_interactions": {
+    "sos_hold": "Use Framer Motion. whileTap scales down to 0.95. A circular progress bar should fill up over 3 seconds to trigger the actual alert, preventing accidental presses.",
+    "hover_states": "Buttons shift background color. Cards lift slightly (-translate-y-1) and gain stronger shadow.",
+    "page_transitions": "Fade in on load using framer-motion (opacity: 0 to 1, y: 10 to 0)."
+  },
+  "accessibility": {
+    "test_ids": "MANDATORY. e.g., data-testid='sos-trigger-btn', data-testid='login-role-select', data-testid='nav-login-link', data-testid='auth-alert-item'",
+    "contrast": "Ensure all text over images uses proper overlays (min black/50) or text-shadow. Red alert text on dark mode must be at least #FCA5A5 for readability against dark backgrounds."
+  },
+  "icons": {
+    "library": "lucide-react",
+    "instructions": "Use lucide-react for all interface icons (ShieldAlert, MapPin, Video, RadioReceiver, PhoneCall). Install if not present."
+  }
+}
