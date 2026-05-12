@@ -23,9 +23,6 @@ export default function Navbar({ dark = false }) {
           {user && user.role === "user" && (
             <Link to="/app" className="hover:text-rose-600" data-testid="nav-user-dashboard">Dashboard</Link>
           )}
-          {user && user.role === "admin" && (
-            <Link to="/admin" className="hover:text-rose-600" data-testid="nav-admin-dashboard">Admin</Link>
-          )}
           {user && user.role === "authority" && (
             <Link to="/authority" className="hover:text-rose-500" data-testid="nav-authority-dashboard">Ops</Link>
           )}

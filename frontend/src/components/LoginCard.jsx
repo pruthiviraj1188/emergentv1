@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShieldAlert, UserCircle2, ShieldCheck, Siren } from "lucide-react";
+import { ShieldAlert, UserCircle2, Siren } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const ROLES = [
   { key: "user", label: "User", icon: UserCircle2, desc: "Personal safety monitoring" },
-  { key: "admin", label: "Admin", icon: ShieldCheck, desc: "Manage platform & oversight" },
   { key: "authority", label: "Authority", icon: Siren, desc: "Respond to live incidents" },
 ];
 
@@ -31,7 +30,7 @@ export default function LoginCard({ compact = false }) {
       return;
     }
     const dest =
-      res.user.role === "admin" ? "/admin" :
+      
       res.user.role === "authority" ? "/authority" : "/app";
     const from = loc.state?.from?.pathname;
     nav(from && !from.startsWith("/login") ? from : dest, { replace: true });
@@ -130,8 +129,6 @@ export default function LoginCard({ compact = false }) {
       </form>
 
       <div className="mt-6 pt-5 border-t border-zinc-200 text-xs text-zinc-600 space-y-1" data-testid="demo-credentials">
-        <div className="font-bold uppercase tracking-widest text-zinc-900">Demo Credentials:</div>
-        <div>Admin: admin@hernet.com / HerNet@Admin2025</div>
         <div className="text-zinc-500">Register to create User/Authority accounts</div>
       </div>
 

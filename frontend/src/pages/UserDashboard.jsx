@@ -42,9 +42,7 @@ export default function UserDashboard() {
   const backChunksRef = useRef([]);
   const frontChunksRef = useRef([]);
   const stopAlarmRef = useRef(null);
-  const sosEventRef = useRef(null);
-
-  const setBackVideoRef = (node) => {
+  const sosEventRef = useRef(null);  const setBackVideoRef = (node) => {
     backVideoRef.current = node;
     if (node && backStreamRef.current) { node.srcObject = backStreamRef.current; node.play().catch(() => {}); }
   };
