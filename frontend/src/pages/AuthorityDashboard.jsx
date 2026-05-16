@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Siren, CheckCircle2, Radio, Crosshair, Shield, Download, Trash2, Clock, Video } from "lucide-react";
+import { MapPin, Siren, CheckCircle2, Radio, Crosshair, Download, Video } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { api } from "@/lib/api";
 
@@ -13,26 +13,15 @@ export default function AuthorityDashboard() {
   const [alerts, setAlerts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [note, setNote] = useState("");
-  const [vault, setVault] = useState(() => JSON.parse(localStorage.getItem("sos_vault") || "[]"));
+  const [vault, setVault] = useState([]);
 
-  // Sync vault from localStorage whenever it updates
+  // Sync vault from localStorage
   useEffect(() => {
     const sync = () => setVault(JSON.parse(localStorage.getItem("sos_vault") || "[]"));
-    window.addEventListener("storage", sync);
     sync();
-    return () => window.removeEventListener("storage", sync);
+    const i = setInterval(sync, 3000);
+    return () => clearInterval(i);
   }, []);
-
-  const deleteVaultEntry = (id) => {
-    const updated = vault.filter((e) => e.id !== id);
-    setVault(updated);
-    localStorage.setItem("sos_vault", JSON.stringify(updated));
-  };
-
-  const downloadVideo = (url, label) => {
-    const a = document.createElement("a");
-    a.href = url; a.download = `authority-${label}-${Date.now()}.webm`; a.click();
-  };
 
   const load = async () => {
     const { data } = await api.get("/sos/active");
@@ -53,6 +42,20 @@ export default function AuthorityDashboard() {
     load();
   };
 
+  const downloadVideo = (url, label) => {
+    const a = document.createElement("a");
+    a.href = url; a.download = `evidence-${label}-${Date.now()}.webm`; a.click();
+  };
+
+  // Match vault entries to selected alert by proximity of timestamp
+  const matchedVaultEntries = selected
+    ? vault.filter((v) => {
+        const alertTime = new Date(selected.created_at).getTime();
+        const vaultTime = new Date(v.timestamp).getTime();
+        return Math.abs(alertTime - vaultTime) < 5 * 60 * 1000; // within 5 mins
+      })
+    : [];
+
   const sortedByThreat = useMemo(() =>
     [...alerts].sort((a, b) => {
       const order = { high: 0, medium: 1, low: 2 };
@@ -63,6 +66,7 @@ export default function AuthorityDashboard() {
     <div className="dark min-h-screen bg-zinc-950 text-zinc-100" data-testid="authority-dashboard">
       <Navbar dark />
       <div className="max-w-full mx-auto grid grid-cols-1 lg:grid-cols-4 min-h-[calc(100vh-4rem)]">
+
         {/* Sidebar feed */}
         <aside className="lg:col-span-1 border-r border-zinc-800 overflow-y-auto" data-testid="authority-alert-feed">
           <div className="p-5 border-b border-zinc-800 sticky top-0 bg-zinc-950 z-10">
@@ -104,9 +108,9 @@ export default function AuthorityDashboard() {
           </div>
         </aside>
 
-        {/* Main / Map */}
-        <main className="lg:col-span-3 bg-zinc-950 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20" style={{
+        {/* Main panel */}
+        <main className="lg:col-span-3 bg-zinc-950 relative overflow-y-auto">
+          <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
             backgroundImage: "linear-gradient(rgba(244,63,94,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(244,63,94,0.2) 1px, transparent 1px)",
             backgroundSize: "60px 60px",
           }} />
@@ -114,13 +118,12 @@ export default function AuthorityDashboard() {
             <Crosshair className="text-rose-600/10" size={500} />
           </div>
 
-          {/* Overlaid cards */}
           <AnimatePresence mode="wait">
             {selected ? (
               <motion.div
                 key={selected.id}
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="relative z-10 m-8 max-w-2xl bg-zinc-900 border border-zinc-800 p-8"
+                className="relative z-10 m-8 max-w-3xl bg-zinc-900 border border-zinc-800 p-8"
                 data-testid="alert-detail-card"
               >
                 <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-rose-500 font-bold">
@@ -128,6 +131,7 @@ export default function AuthorityDashboard() {
                 </div>
                 <h2 className="font-display text-3xl font-black tracking-tighter mt-2">{selected.user_name}</h2>
                 <div className="mt-1 text-zinc-400 text-sm">{selected.user_phone || "No phone on file"}</div>
+
                 <div className="mt-5 grid grid-cols-2 gap-4">
                   <div className="border border-zinc-800 p-4">
                     <div className="text-[10px] uppercase tracking-widest text-zinc-500">Threat Level</div>
@@ -137,9 +141,13 @@ export default function AuthorityDashboard() {
                     <div className="text-[10px] uppercase tracking-widest text-zinc-500">Triggered</div>
                     <div className="mt-1 text-sm">{new Date(selected.created_at).toLocaleString()}</div>
                   </div>
+
+                  {/* Location */}
                   <div className="col-span-2 border border-zinc-800 p-4">
-                    <div className="text-[10px] uppercase tracking-widest text-zinc-500 flex items-center gap-2"><MapPin size={12} /> Location</div>
-                    <div className="font-mono text-sm mt-1">
+                    <div className="text-[10px] uppercase tracking-widest text-zinc-500 flex items-center gap-2 mb-2">
+                      <MapPin size={12} /> Location
+                    </div>
+                    <div className="font-mono text-sm">
                       {selected.lat != null ? `${selected.lat.toFixed(5)}, ${selected.lng.toFixed(5)}` : "Unavailable"}
                     </div>
                     {selected.lat != null && (
@@ -147,13 +155,53 @@ export default function AuthorityDashboard() {
                         href={`https://maps.google.com/?q=${selected.lat},${selected.lng}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="mt-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold px-3 py-2 bg-rose-600 text-white hover:bg-rose-700"
+                        className="mt-3 inline-flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold px-4 py-2 bg-rose-600 text-white hover:bg-rose-700"
                       >
-                        <MapPin size={10} /> View Live Location
+                        <MapPin size={10} /> View Live Location on Map
                       </a>
                     )}
                   </div>
+
+                  {/* Recorded Videos */}
+                  {matchedVaultEntries.length > 0 && (
+                    <div className="col-span-2 border border-zinc-800 p-4">
+                      <div className="text-[10px] uppercase tracking-widest text-zinc-500 flex items-center gap-2 mb-3">
+                        <Video size={12} /> Recorded Evidence
+                      </div>
+                      {matchedVaultEntries.map((entry) => (
+                        <div key={entry.id} className="space-y-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            {entry.backVideoUrl && (
+                              <div>
+                                <div className="text-[10px] text-zinc-500 mb-1">Back Camera</div>
+                                <video src={entry.backVideoUrl} controls className="w-full border border-zinc-700 rounded" />
+                                <button
+                                  onClick={() => downloadVideo(entry.backVideoUrl, "back")}
+                                  className="mt-1 w-full flex items-center justify-center gap-1 text-[10px] uppercase tracking-widest font-bold px-3 py-2 bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
+                                >
+                                  <Download size={10} /> Download
+                                </button>
+                              </div>
+                            )}
+                            {entry.frontVideoUrl && (
+                              <div>
+                                <div className="text-[10px] text-zinc-500 mb-1">Front Camera</div>
+                                <video src={entry.frontVideoUrl} controls className="w-full border border-zinc-700 rounded" />
+                                <button
+                                  onClick={() => downloadVideo(entry.frontVideoUrl, "front")}
+                                  className="mt-1 w-full flex items-center justify-center gap-1 text-[10px] uppercase tracking-widest font-bold px-3 py-2 bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
+                                >
+                                  <Download size={10} /> Download
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
                 <div className="mt-5">
                   <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold block mb-1">Resolution Note</label>
                   <textarea
@@ -180,81 +228,12 @@ export default function AuthorityDashboard() {
                 <div className="max-w-md">
                   <Crosshair size={40} className="mx-auto text-rose-500" />
                   <h2 className="mt-4 font-display text-3xl font-black tracking-tighter">Command Center</h2>
-                  <p className="text-zinc-400 mt-2">Select an active incident from the feed to view details, location, and dispatch actions.</p>
+                  <p className="text-zinc-400 mt-2">Select an active incident from the feed to view details, location and recorded evidence.</p>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </main>
-      </div>
-
-      {/* Safety Vault */}
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className="bg-zinc-900 border border-zinc-800 p-6">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-400 mb-6">
-            <Shield size={14} className="text-rose-500" /> Safety Vault — Recorded Evidence
-          </div>
-          {vault.length === 0 ? (
-            <div className="text-sm text-zinc-500">No SOS recordings in vault yet.</div>
-          ) : (
-            <div className="space-y-4">
-              {vault.map((entry) => (
-                <div key={entry.id} className="border border-zinc-800 bg-zinc-950 p-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="w-2 h-2 rounded-full bg-rose-500" />
-                        <span className="text-xs font-bold uppercase tracking-widest text-rose-400">SOS Event — {entry.user || "Unknown"}</span>
-                      </div>
-                      <div className="text-xs text-zinc-400 flex items-center gap-1">
-                        <Clock size={10} /> {new Date(entry.timestamp).toLocaleString()}
-                      </div>
-                      {entry.location && (
-                        <div className="mt-2">
-                          <div className="font-mono text-xs text-zinc-300">
-                            {entry.location.lat.toFixed(5)}, {entry.location.lng.toFixed(5)}
-                          </div>
-                          <a
-                            href={entry.mapsLink}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="mt-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold px-3 py-2 bg-rose-600 text-white hover:bg-rose-700"
-                          >
-                            <MapPin size={10} /> View Location
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex gap-2 flex-wrap">
-                      {entry.backVideoUrl && (
-                        <button
-                          onClick={() => downloadVideo(entry.backVideoUrl, "back")}
-                          className="flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold px-3 py-2 bg-zinc-800 text-zinc-200 hover:bg-zinc-700 border border-zinc-700"
-                        >
-                          <Download size={10} /> <Video size={10} /> Back Cam
-                        </button>
-                      )}
-                      {entry.frontVideoUrl && (
-                        <button
-                          onClick={() => downloadVideo(entry.frontVideoUrl, "front")}
-                          className="flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold px-3 py-2 bg-zinc-800 text-zinc-200 hover:bg-zinc-700 border border-zinc-700"
-                        >
-                          <Download size={10} /> <Video size={10} /> Front Cam
-                        </button>
-                      )}
-                      <button
-                        onClick={() => deleteVaultEntry(entry.id)}
-                        className="flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold px-3 py-2 bg-rose-900 text-rose-200 hover:bg-rose-800 border border-rose-800"
-                      >
-                        <Trash2 size={10} /> Delete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

@@ -91,8 +91,14 @@ const startRecording = async () => {
     backChunksRef.current = [];
     frontChunksRef.current = [];
     try {
-      // Get microphone audio once and share across both recorders
-      const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Audio with noise suppression + echo cancellation to filter out siren
+      const audioStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        }
+      });
       const audioTrack = audioStream.getAudioTracks()[0];
 
       // Back camera + shared audio
@@ -153,8 +159,17 @@ const startRecording = async () => {
   };
 
   const fireSOS = async () => {
-    startRecording();
+    // Start recording FIRST before siren plays — so mic captures only voice
+    await startRecording();
     setSosActive(true);
+
+    // Play siren after 1 second delay so it doesn't bleed into recording
+    setTimeout(() => {
+      if (stopAlarmRef.current === null) {
+        // trigger siren via SOSButton ref workaround — dispatch custom event
+        window.dispatchEvent(new CustomEvent("hernet-play-siren"));
+      }
+    }, 1000);
 
     const position = await new Promise((resolve) =>
       navigator.geolocation

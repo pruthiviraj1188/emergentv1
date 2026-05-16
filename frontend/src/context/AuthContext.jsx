@@ -36,6 +36,7 @@ export function AuthProvider({ children }) {
       setUser(data.user);
       return { ok: true, user: data.user };
     } catch (e) {
+      if (!e.response) return { ok: false, error: "Cannot connect to server. Make sure the backend is running." };
       return { ok: false, error: formatApiError(e.response?.data?.detail) || e.message };
     }
   };
@@ -47,6 +48,7 @@ export function AuthProvider({ children }) {
       setUser(data.user);
       return { ok: true, user: data.user };
     } catch (e) {
+      if (!e.response) return { ok: false, error: "Cannot connect to server. Make sure the backend is running." };
       return { ok: false, error: formatApiError(e.response?.data?.detail) || e.message };
     }
   };

@@ -1,13 +1,13 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Siren } from "lucide-react";
 
 export default function SOSButton({ onTrigger, onStopAlarm, disabled = false }) {
   const alarmRef = useRef(null);
 
-  const playSOSAlarm = () => {
+  const playSiren = () => {
     try {
-      const playSiren = (context) => {
+      const run = (context) => {
         const osc = context.createOscillator();
         const gain = context.createGain();
         osc.connect(gain);
@@ -18,40 +18,33 @@ export default function SOSButton({ onTrigger, onStopAlarm, disabled = false }) 
         const sweepTime = 0.6;
         for (let i = 0; i < duration / sweepTime; i++) {
           const t = context.currentTime + i * sweepTime;
-          if (i % 2 === 0) {
-            osc.frequency.setValueAtTime(600, t);
-            osc.frequency.linearRampToValueAtTime(1200, t + sweepTime);
-          } else {
-            osc.frequency.setValueAtTime(1200, t);
-            osc.frequency.linearRampToValueAtTime(600, t + sweepTime);
-          }
+          osc.frequency.setValueAtTime(i % 2 === 0 ? 600 : 1200, t);
+          osc.frequency.linearRampToValueAtTime(i % 2 === 0 ? 1200 : 600, t + sweepTime);
         }
         osc.start(context.currentTime);
         osc.stop(context.currentTime + duration);
       };
-
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      playSiren(ctx);
-
+      run(ctx);
       alarmRef.current = setInterval(() => {
-        try {
-          const loopCtx = new (window.AudioContext || window.webkitAudioContext)();
-          playSiren(loopCtx);
-        } catch {}
+        try { const c = new (window.AudioContext || window.webkitAudioContext)(); run(c); } catch {}
       }, 10000);
-
       if (onStopAlarm) {
-        onStopAlarm.current = () => {
-          clearInterval(alarmRef.current);
-          alarmRef.current = null;
-        };
+        onStopAlarm.current = () => { clearInterval(alarmRef.current); alarmRef.current = null; };
       }
     } catch {}
   };
 
+  // Listen for delayed siren trigger from dashboard
+  useEffect(() => {
+    const handler = () => playSiren();
+    window.addEventListener("hernet-play-siren", handler);
+    return () => window.removeEventListener("hernet-play-siren", handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleTap = () => {
     if (disabled) return;
-    playSOSAlarm();
     onTrigger?.();
   };
 
